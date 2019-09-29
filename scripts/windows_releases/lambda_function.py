@@ -18,17 +18,19 @@ def get_release_info():
   options.binary_location = './bin/headless-chromium'
   options.add_argument('--headless')
   options.add_argument('--disable-gpu')
+  options.add_argument('--disable-dev-shm-usage')
+  options.add_argument('--no-sandbox')
   options.add_argument('--window-size=1920,1080')
   options.add_argument('--single-process')
   options.add_argument('--ignore-certificate-errors')
-  options.add_argument('--homedir=/tmp')
 
-  driver = webdriver.Chrome('./bin/chromedriver', chrome_options=options)
+  driver = webdriver.Chrome(executable_path='./bin/chromedriver', chrome_options=options)
   driver.get(WINDOWS_RELEASE_INFORMATION_URL)
   time.sleep(5)
   title = driver.title
 
   driver.close()
+  driver.quit()
 
   return title
 
@@ -54,6 +56,26 @@ def read_sheet(service):
       print('%s' % (row[0]))
 
 
+def append_sheet(service):
+  body = {
+    'requests': {
+      'addSheet': {
+        'properties' : {
+          'title': '1903'
+        }
+      }
+    }
+  }
+
+  request = service.spreadsheets().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=body)
+  response = request.execute()
+
+  print(response)
+
+
 def lambda_handler(event, context):
-  service = get_sheets_service()
-  read_sheet(service)
+  # service = get_sheets_service()
+  # read_sheet(service)
+  # append_sheet(service)
+
+  return get_release_info()
